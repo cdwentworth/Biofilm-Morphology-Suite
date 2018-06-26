@@ -3,11 +3,12 @@
 """
 Title: Biofilm Accumulation
 File: bfAcc.py
-Version: 6-26-2018.1
+Version: 6-26-2018.2
 Author: C. Wentworth
 Revisions:
     6-3-2018.1
-    6-26-2018.1: added thresholding 
+    6-26-2018.1: added thresholding
+    6-26-2018.2: added command line argument processing
 
 """
 
@@ -15,6 +16,8 @@ import matplotlib.pylab as plt
 import numpy as np
 import skimage.io as skio
 import skimage.filters as skf
+import sys
+import getopt as go
 
 def adjust(inputImage,imageZero):
 #    import numpy as np
@@ -31,10 +34,35 @@ def adjust(inputImage,imageZero):
             adjustedImage[i,j] = a
     return adjustedImage
 
-# open output file
-outFile = open('bfa_1.0Dy.txt','w')
+def getArguments():
+   inputfile = ''
+   outputfile = ''
+   argList = sys.argv[1:]
+   try:
+      opts, args = go.getopt(argList,"hi:o:",["ifile=","ofile="])
+   except go.GetoptError:
+      print ('bfAcc.py -i <inputfile> -o <outputfile>')
+      sys.exit(2)
+   for opt, arg in opts:
+      if opt == '-h':
+         print ('bfAcc.py -i <inputfile> -o <outputfile>')
+         sys.exit()
+      elif opt in ("-i", "--ifile"):
+         inputfile = arg
+      elif opt in ("-o", "--ofile"):
+         outputfile = arg
 
-tiffStack = skio.imread('041118_W1FITC 100- CAM_S24_1D_T.tif')
+   return inputfile, outputfile
+
+# main
+
+# get command line arguments
+tiffStackFile, bfaDataFile = getArguments()
+   
+# establish input data and output file
+outFile = open(bfaDataFile ,'w')
+
+tiffStack = skio.imread(tiffStackFile)
 numImages = tiffStack.shape[0]
 
 # get first image
