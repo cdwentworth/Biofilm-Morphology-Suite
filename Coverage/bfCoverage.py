@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Title: Biofilm Accumulation
-File: bfAcc.py
-Version: 6-26-2018.1
+Title: Biofilm Coverage
+File: bfCoverage.py
+Date: 6/1/2018 12:46
 Author: C. Wentworth
-Revisions:
-    6-3-2018.1
-    6-26-2018.1: added thresholding 
+
+This script produces a plot of biofilm surface coverage percent as a
+function of time using a stack of BioFlux images.
 
 """
 
@@ -15,6 +15,8 @@ import matplotlib.pylab as plt
 import numpy as np
 import skimage.io as skio
 import skimage.filters as skf
+from skimage import img_as_uint
+
 
 def adjust(inputImage,imageZero):
 #    import numpy as np
@@ -32,7 +34,7 @@ def adjust(inputImage,imageZero):
     return adjustedImage
 
 # open output file
-outFile = open('bfa_1.0Dy.txt','w')
+outFile = open('bfc_1.0Dy.txt','w')
 
 tiffStack = skio.imread('041118_W1FITC 100- CAM_S24_1D_T.tif')
 numImages = tiffStack.shape[0]
@@ -44,7 +46,11 @@ zeroImage = tiffStack[0,:,:]
 adjImage = adjust(tiffStack[23,:,:],zeroImage)
 thresh = skf.threshold_triangle(adjImage)
 
-intensityArray = []
+# size of image    
+h,w = np.shape(zeroImage)
+size = h*w
+size = float(size)
+coverageArray = []
 timeArray = []
 timeMinutes = 0
 
@@ -52,16 +58,16 @@ for i in range(5,numImages,6):
     iImage = tiffStack[i,:,:]
     adjImage = adjust(iImage,zeroImage)
     binaryImage = adjImage > thresh
-    intensityTotal = np.sum(adjImage[binaryImage])
-
-    intensityArray.append(intensityTotal)
+    numberOfTrues = np.count_nonzero(binaryImage)
+    percentCoverage = numberOfTrues*100/size
+    coverageArray.append(percentCoverage)
     timeArray.append(timeMinutes)
     timeMinutes = timeMinutes + 30
-    outFile.write('%8.2f\t%8.4e\n' % (timeMinutes, intensityTotal))
+    outFile.write('%8.2f\t%8.4e\n' % (timeMinutes, percentCoverage))
     
 outFile.close()
-plt.plot(timeArray,intensityArray,linestyle='',marker='o')
+plt.plot(timeArray,coverageArray,linestyle='',marker='o')
 plt.xlabel('t [min]')
-plt.ylabel('N [rel]')
-plt.savefig('033018_W1FITC 100- CAM_S4_bfa_1.0D_T.png')
+plt.ylabel('c [%]')
+plt.savefig('041118_W1FITC 100- CAM_S24_1D_bfc_T.png')
 plt.show()
