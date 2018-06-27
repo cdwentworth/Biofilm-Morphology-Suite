@@ -8,10 +8,11 @@ Author: C. Wentworth
 """
 
 import matplotlib.pylab as plt
-import numpy as np
 import skimage.io as skio
 import skimage.feature as skf
 from sklearn.metrics.cluster import entropy
+import sys
+
 
 def adjust(inputImage,imageZero):
     import numpy as np
@@ -28,21 +29,29 @@ def adjust(inputImage,imageZero):
             adjustedImage[i,j] = a
     return adjustedImage
 
-# open output file
-outFile = open('TE_1.00Dy.txt','w')
+# main
 
-testStack = skio.imread('041118_W1FITC 100- CAM_S24_T.tif')
-numImages = testStack.shape[0]
+# get command line arguments
+tiffStackFile = str(sys.argv[1])
+   
+# establish input data and output files
+tiffStack = skio.imread(tiffStackFile)
+tiffStackFilePieces = tiffStackFile.split('.')
+outFileName = tiffStackFilePieces[0] + '.txt'
+outFile = open(outFileName,'w')
+graphFileName = tiffStackFilePieces[0] + '.png'
+
+numImages = tiffStack.shape[0]
 
 # get first image
-zeroImage = testStack[0,:,:]
+zeroImage = tiffStack[0,:,:]
 
 TEarray = []
 timeArray = []
 timeMinutes = 0
 
 for i in range(5,numImages,6):
-    iImage = testStack[i,:,:]
+    iImage = tiffStack[i,:,:]
     adjImage = adjust(iImage,zeroImage)
     glcm = skf.greycomatrix(adjImage, [1,2,3,4], [0,1.5708], 712, 
                         symmetric=True, normed=True)
@@ -54,4 +63,5 @@ for i in range(5,numImages,6):
     
 outFile.close()
 plt.plot(timeArray,TEarray,linestyle='',marker='o')
+plt.savefig(graphFileName,dpi=300)
 plt.show()

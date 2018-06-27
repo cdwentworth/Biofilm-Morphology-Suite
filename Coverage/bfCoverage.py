@@ -3,11 +3,15 @@
 """
 Title: Biofilm Coverage
 File: bfCoverage.py
-Date: 6/1/2018 12:46
+Version: 6-26-2018.1
 Author: C. Wentworth
 
 This script produces a plot of biofilm surface coverage percent as a
 function of time using a stack of BioFlux images.
+
+Revisions:
+    6-1-2018.1: initial commit
+    6-26-2018.1: added command line argument processing
 
 """
 
@@ -15,7 +19,7 @@ import matplotlib.pylab as plt
 import numpy as np
 import skimage.io as skio
 import skimage.filters as skf
-from skimage import img_as_uint
+import sys
 
 
 def adjust(inputImage,imageZero):
@@ -33,10 +37,18 @@ def adjust(inputImage,imageZero):
             adjustedImage[i,j] = a
     return adjustedImage
 
-# open output file
-outFile = open('bfc_1.0Dy.txt','w')
+# main
 
-tiffStack = skio.imread('041118_W1FITC 100- CAM_S24_1D_T.tif')
+# get command line arguments
+tiffStackFile = str(sys.argv[1])
+   
+# establish input data and output files
+tiffStack = skio.imread(tiffStackFile)
+tiffStackFilePieces = tiffStackFile.split('.')
+outFileName = tiffStackFilePieces[0] + '.txt'
+outFile = open(outFileName,'w')
+graphFileName = tiffStackFilePieces[0] + '.png'
+
 numImages = tiffStack.shape[0]
 
 # get first image
@@ -69,5 +81,5 @@ outFile.close()
 plt.plot(timeArray,coverageArray,linestyle='',marker='o')
 plt.xlabel('t [min]')
 plt.ylabel('c [%]')
-plt.savefig('041118_W1FITC 100- CAM_S24_1D_bfc_T.png')
+plt.savefig(graphFileName,dpi=300)
 plt.show()
