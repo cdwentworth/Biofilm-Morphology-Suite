@@ -9,7 +9,8 @@ Author: C.D. Wentworth
 Summary: This program will construct a 16 bit grayscale image with a 
 cosine variation of intensity.  The wavelength and direction of the variation
 is given by the values of kx and ky, the x and y components of the wave
-number.  In Fourier analysis kx and ky would be called frequencies.
+number.  In Fourier analysis kx and ky would be called frequencies, but
+this transform is from the spatial domain to wave number domain.
 
 usage: python makeCosineImage.py
 Revisions: 
@@ -29,15 +30,18 @@ import numpy as np
 import skimage.io as skio
 
 # main
-h = 800
-w = 800
+h = 200
+w = 200
 maxI = 65535
 newImage = np.zeros((h,w),dtype='uint16')
-kx = 1.
-ky = 0.
+
+# Define the wave number
+p = w/10.       # wavelength in pixels
+kx = 2.*np.pi/p
+ky = 2.*np.pi/p
 for x in range(0,w):
     for y in range(0,h):
         v = maxI*(np.cos(kx*x+ky*y)+1)/2
         newImage[y,x]=int(v)
-skio.imsave('hCosine2.png',newImage)
+skio.imsave('dCosine1.png',newImage)
     
