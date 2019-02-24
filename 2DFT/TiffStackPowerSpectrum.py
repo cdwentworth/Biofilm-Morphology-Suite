@@ -14,10 +14,12 @@ import skimage.io as skio
 
 #function to perform the Fourier Transform and find the Power Spectrum
 def PowerSpectrum(inputImage):
-    fft1 = scfft.fft2(tiffStack)
+#    fft1 = scfft.fft2(tiffStack)
+    fft1 = scfft.fft2(inputImage)
     fft2 = scfft.fftshift( fft1 )
     ps = np.abs(fft2)
-    ps = 20*np.log10(ps+0.1)
+#    ps = 20*np.log10(ps+0.1)
+    ps = 50*np.log10(ps)
     ps = ps.astype(int)
     h,w = ps.shape
     for r in range(h):
@@ -27,24 +29,28 @@ def PowerSpectrum(inputImage):
     return ps
 
 #read in the tiff stack
-tiffStackFile = 'Processed_033018_W1FITC 100- CAM_S4_0.2D_T.tif'
+tiffStackFile = 'biofilmSubStack.tif'
 tiffStack = skio.imread(tiffStackFile)
 tiffStackFilePieces = tiffStackFile.split('.')
 
 #get the size of the stack
-numImages = tiffStack.shape[0]
+#numImages = tiffStack.shape[0]
+numImages,h,w = tiffStack.shape
+psStack = np.zeros((numImages,h,w),dtype=np.int16)
 
 i = 0
-while i <= numImages:
+while i < numImages:
     #image for whatever i is
     iImage = tiffStack[i,:,:]
     #find the power spectrum
     power_spectrum = PowerSpectrum(iImage)
+    psStack[i]=power_spectrum
     #show the image and the power spectrum
-    plt.imshow(iImage)
-    plt.imshow(power_spectrum)
+#    plt.imshow(iImage)
+#    plt.imshow(power_spectrum)
     #update i for the loop
     i = i + 1
+skio.imsave('psStack.tif',psStack)
     
     
     
