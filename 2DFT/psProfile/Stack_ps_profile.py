@@ -2,7 +2,7 @@
 """
 Title: Stack Power Spectrum Profile 
 Author: Sarah Vaughn
-Version: 3-26-2019.2
+Version: 3-27-2019.1
 Summary:
 Code to calculate the profile of a stack of images at certain degree values. This code
 will produce a .txt file that will contain a list of all of the values of Mu (the decay ratio)
@@ -12,6 +12,7 @@ History:
     3-26-2019.1: Base
     3-26-2019.2: added code to write data to a file using
                  numpy.savetxt
+    3-27-2019.1: placed bounds on parameter search
     
 """
 import matplotlib.pylab as plt
@@ -106,7 +107,13 @@ def Profile(ps,thetaMax,numAngles):
         Nmin = 70
         mu = 0.1
         p = Nmin,mu,N0
-        popt,pcov = curve_fit(profileFit,rl,pl,p)
+        boundsLower = (50,0,0.95*N0)
+        boundsUpper = (200,np.inf,1.05*N0)
+        try:
+            popt,pcov = curve_fit(profileFit,rl,pl,p,
+                                  bounds=(boundsLower,boundsUpper))
+        except RuntimeError:
+            popt = -1000 , -1000 , -1000
         pFitData = popt[0],popt[1], popt[2]
         pFitList.append(pFitData)
 
@@ -122,7 +129,7 @@ def Profile(ps,thetaMax,numAngles):
 #main program
     
 #read in the tiff stack
-tiffStackFile = 'biofilmSubStack.tif'
+tiffStackFile = 'subStack.tif'
 tiffStack = skio.imread(tiffStackFile)
 tiffStackFilePieces = tiffStackFile.split('.')
 
@@ -155,8 +162,8 @@ while i < numImages:
         data[imageSet+j,4] = N0List[j]
     #update i for the loop
     i = i + 1
-headerString1 = 'number of images = %5i number of angles = %5i \n' % (numImages,2*numAngles+1)
-headerString2 = 'image \t    angle \t     mu \t      Nmin  \t    N0'
+headerString1 = 'number_of_images= %5i number_of_angles= %5i \n' % (numImages,2*numAngles+1)
+headerString2 = 'image       angle       mu          Nmin       N0'
 headerString = headerString1 + headerString2
-np.savetxt('profileData.txt',data,fmt='% 8.3e', delimiter='  ',
+np.savetxt('subStack_profileData.txt',data,fmt='% 8.3e', delimiter='  ',
            header=headerString)
