@@ -2,7 +2,7 @@
 """
 Title: Stack Power Spectrum Profile 
 Author: Sarah Vaughn
-Version: 3-27-2019.1
+Version: 3.27.2019.2
 Summary:
 Code to calculate the profile of a stack of images at certain degree values. This code
 will produce a .txt file that will contain a list of all of the values of Mu (the decay ratio)
@@ -12,7 +12,8 @@ History:
     3-26-2019.1: Base
     3-26-2019.2: added code to write data to a file using
                  numpy.savetxt
-    3-27-2019.1: placed bounds on parameter search
+    3.27.2019.1: placed bounds on parameter search in Profile
+    3.27.2019.2: put in a check that N0 is positive
     
 """
 import matplotlib.pylab as plt
@@ -79,7 +80,7 @@ def Profile(ps,thetaMax,numAngles):
     """
     Title: Profile
     Author: Sarah Vaughn
-    Version: 3.26.2019.1
+    Version: 3.27.2019.1
     Summary: This function takes a power spectrum and for a set
              of directions fits the power spectrum profile along
              the direction to a modified exponential function.
@@ -89,6 +90,9 @@ def Profile(ps,thetaMax,numAngles):
              muList: the list of best-fit decay rates
     History:
         3.26.2019.1: base
+        3.27.2019.1: placed bounds on parameter search
+	   3.27.2019.2: put in a check that N0 is positive
+        
 
     """    
     # make sure all power spectrum values greater than or equal to
@@ -104,15 +108,18 @@ def Profile(ps,thetaMax,numAngles):
         rl,pl = calcProfile(ps,theta)
         # fit profile
         N0 = np.amax(ps)
-        Nmin = 70
-        mu = 0.1
-        p = Nmin,mu,N0
-        boundsLower = (50,0,0.95*N0)
-        boundsUpper = (200,np.inf,1.05*N0)
-        try:
-            popt,pcov = curve_fit(profileFit,rl,pl,p,
-                                  bounds=(boundsLower,boundsUpper))
-        except RuntimeError:
+        if N0>0:
+            Nmin = 70
+            mu = 0.1
+            p = Nmin,mu,N0
+            boundsLower = (50,0,0.95*N0)
+            boundsUpper = (200,np.inf,1.05*N0)
+            try:
+                popt,pcov = curve_fit(profileFit,rl,pl,p,
+                                      bounds=(boundsLower,boundsUpper))
+            except RuntimeError:
+                popt = -1000 , -1000 , -1000
+        else:
             popt = -1000 , -1000 , -1000
         pFitData = popt[0],popt[1], popt[2]
         pFitList.append(pFitData)
@@ -129,7 +136,7 @@ def Profile(ps,thetaMax,numAngles):
 #main program
     
 #read in the tiff stack
-tiffStackFile = 'subStack.tif'
+tiffStackFile = 'Processed_033018_W1FITC100-CAM_S15_T_0.5dyne_cm2.tif'
 tiffStack = skio.imread(tiffStackFile)
 tiffStackFilePieces = tiffStackFile.split('.')
 
@@ -165,5 +172,5 @@ while i < numImages:
 headerString1 = 'number_of_images= %5i number_of_angles= %5i \n' % (numImages,2*numAngles+1)
 headerString2 = 'image       angle       mu          Nmin       N0'
 headerString = headerString1 + headerString2
-np.savetxt('subStack_profileData.txt',data,fmt='% 8.3e', delimiter='  ',
+np.savetxt('Processed_033018_W1FITC100-CAM_S15_T_0.5dyne_cm2_profileData.txt',data,fmt='% 8.3e', delimiter='  ',
            header=headerString)
