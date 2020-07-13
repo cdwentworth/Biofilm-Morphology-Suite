@@ -1,24 +1,20 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Title: Textural Entropy
-File: TEvsTime.py
-Author: C.D. Wentworth
-Revisions: 
-    4-14-2018.1: base code
-Summary: This program reads in a stack of tiff microscope 
-         images and then calculates the entropy of each
-         image as a funciton of time and saves the  data 
-         in a txt file.
-Usage: python TEvsTime.py stackFileName.tif          
+Title: Dissimilarity Calculation for Stack
+Author: A. Ewen
+Version: 7.2.2020.1
+Usage: python dissimilarityCalcStack.py
+Summary:
+History:
+    7.2.2020.1: base
+    
 """
 
 import matplotlib.pylab as plt
 import skimage.io as skio
 import skimage.feature as skf
-from sklearn.metrics.cluster import entropy
 import sys
-
+import numpy as np
 
 def adjust(inputImage,imageZero):
     import numpy as np
@@ -35,39 +31,34 @@ def adjust(inputImage,imageZero):
             adjustedImage[i,j] = a
     return adjustedImage
 
-# main
-
-# get command line arguments
-tiffStackFile = str(sys.argv[1])
+# Main Program
    
 # establish input data and output files
-tiffStack = skio.imread(tiffStackFile)
+tiffStack = skio.imread(r'..\07-19-2019__w1FITC_1.5D_s1.tif')
 tiffStackFilePieces = tiffStackFile.split('.')
 outFileName = tiffStackFilePieces[0] + '.txt'
 outFile = open(outFileName,'w')
-graphFileName = tiffStackFilePieces[0] + '.png'
 
 numImages = tiffStack.shape[0]
 
 # get first image
 zeroImage = tiffStack[0,:,:]
 
-TEarray = []
-timeArray = []
 timeMinutes = 0
+d = np.linspace(1,500,100)
 
-for i in range(5,numImages,6):
+for i in range(5,50,5):
     iImage = tiffStack[i,:,:]
     adjImage = adjust(iImage,zeroImage)
-    glcm = skf.greycomatrix(adjImage, [1,2,3,4], [0,1.5708], 712, 
+    gx = skf.greycomatrix(adjImage, d, [0], 712, 
                         symmetric=True, normed=True)
-    TE = entropy(glcm)
-    TEarray.append(TE)
-    timeArray.append(timeMinutes)
+    cx = skf.greycoprops(gx, 'dissimilarity')
+    cx = np.ndarray.flatten(cx)
+    cx = np.ndarray.tolist(cx)
     timeMinutes = timeMinutes + 30
-    outFile.write('%8.2f\t%8.4e\n' % (timeMinutes, TE))
-    
+    outFile.write('%8.2f\t' % timeMinutes)
+    for n in cx:
+        outFile.write('%8.3e\t' % n)
+    outFile.write('\n')
+
 outFile.close()
-plt.plot(timeArray,TEarray,linestyle='',marker='o')
-plt.savefig(graphFileName,dpi=300)
-plt.show()

@@ -1,6 +1,16 @@
-# Figure 1
-# Roughness - PA01 System
-#
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Title: Plot Textural Entropy
+File: plotTE.py
+Author: C.D. Wentworth
+Revisions: 
+    4-14-2018.1: base code
+Summary: This program reads in textural entropy-timeData 
+         data and creates a plot.
+Usage: python plotTE.py TEDataFileName.txt    
+      
+"""
 import numpy as np
 import matplotlib.pylab as plt
 

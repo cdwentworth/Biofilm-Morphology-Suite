@@ -6,7 +6,7 @@ Version: 3.27.2019.2
 Summary:
 Code to calculate the profile of a stack of images at certain degree values. This code
 will produce a .txt file that will contain a list of all of the values of Mu (the decay ratio)
-and the values of the degree with the corrisponding image number.
+and the values of the degree with the corresponding image number.
 
 History:
     3-26-2019.1: Base
@@ -91,7 +91,7 @@ def Profile(ps,thetaMax,numAngles):
     History:
         3.26.2019.1: base
         3.27.2019.1: placed bounds on parameter search
-	   3.27.2019.2: put in a check that N0 is positive
+	    3.27.2019.2: put in a check that N0 is positive
         
 
     """    
@@ -150,7 +150,7 @@ numRows = numImages*(2*numAngles+1)
 data = np.zeros((numRows,5),
                 dtype=np.float64)
 i = 0
-while i < numImages:
+while i < numImages:  # Better to use a for loop here - CDW
     #image for whatever i is
     iImage = tiffStack[i,:,:]
     #find the power spectrum

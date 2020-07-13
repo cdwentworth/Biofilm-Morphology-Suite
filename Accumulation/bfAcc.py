@@ -6,10 +6,15 @@ File: bfAcc.py
 Version: 6-26-2018.2
 Author: C. Wentworth
 Revisions:
-    6-3-2018.1
+    6-3-2018.1: base code
     6-26-2018.1: added thresholding 
     6-26-2018.2: added command line argument processing
-    
+Summary: This program will read a stack of tif images obtained from 
+         the BioFlux microscope station, perform some thresholding,
+         and then measure the relative biofilm accumulation as a 
+         function of time.
+Usage: python bfAcc.py stackFileName.tif  
+  
 """
 
 import matplotlib.pylab as plt
