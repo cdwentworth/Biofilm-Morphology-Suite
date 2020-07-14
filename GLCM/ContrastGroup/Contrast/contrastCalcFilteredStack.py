@@ -17,10 +17,13 @@ import sys
 import numpy as np
 
 # Main Program
+
+# User specified data
+tiffStackFile = 'subStack.tif'  # This file should be in the same folder as prrogram
+numSkippedFrames = 6
    
 # establish input data and output files
-tiffStackFile = 'subStack.tif'
-tiffStack = skio.imread(r'..\subStack.tif')
+tiffStack = skio.imread(tiffStackFile)
 tiffStackFilePieces = tiffStackFile.split('.')
 outFileXName = tiffStackFilePieces[0] + 'cx' + '.txt'
 outFileYName = tiffStackFilePieces[0] + 'cy' + '.txt'
@@ -46,7 +49,7 @@ d = np.arange(1,100,2)
 de= np.arange(101,512,8)
 d = np.concatenate((d,de))
 
-for i in range(5,numImages,6):
+for i in range(5,numImages,numSkippedFrames):
     iImage = tiffStack[i,:,:]
     gx = skf.greycomatrix(iImage, d, [0], 712, 
                         symmetric=True, normed=True)
@@ -58,7 +61,7 @@ for i in range(5,numImages,6):
     cy = skf.greycoprops(gy, 'contrast')
     cy = np.ndarray.flatten(cy)
     cy = np.ndarray.tolist(cy)    
-    timeMinutes = timeMinutes + 30
+    timeMinutes = timeMinutes + 5*numSkippedFrames
     outFileX.write('%8.2f\t' % timeMinutes)
     for n in cx:
         outFileX.write('%8.3f\t' % n)

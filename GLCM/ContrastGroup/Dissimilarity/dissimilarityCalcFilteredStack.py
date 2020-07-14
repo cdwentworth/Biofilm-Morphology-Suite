@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
 """
 Title: Dissimilarity Calculation for Filtered Stack
-Author: A. Ewen
-Version: 7.13.2020.1
+Author: A. Ewen and C.D. Wentworth
+Version: 7.14.2020.1
 Usage: python dissimilarityCalcFilteredStack.py
-Summary:
+Summary: This program reads in a tiff stack of microscope images and then
+         calculates the GLCM dissimilarity for 100 reference-point 
+         distances for both the x and y directions. It is assumed that
+         the microscope images have been filtered by subtracting out the
+         intensity of the first image. The measurements are written to text 
+         files, one for the x measurements and one for the y measurements.
 History:
     7.13.2020.1: base
+    7.14.2020.1: organized the user supplied data in one place
     
 """
 
@@ -17,10 +23,14 @@ import sys
 import numpy as np
 
 # Main Program
+
+# User specified data
+tiffStackFile = 'subStack.tif'  # This file should be in the same folder as prrogram
+numSkippedFrames = 6
    
 # establish input data and output files
 tiffStackFile = 'subStack.tif'
-tiffStack = skio.imread(r'..\subStack.tif')
+tiffStack = skio.imread(tiffStackFile)
 tiffStackFilePieces = tiffStackFile.split('.')
 outFileXName = tiffStackFilePieces[0] + 'cx' + '.txt'
 outFileYName = tiffStackFilePieces[0] + 'cy' + '.txt'
@@ -46,7 +56,7 @@ d = np.arange(1,100,2)
 de= np.arange(101,512,8)
 d = np.concatenate((d,de))
 
-for i in range(5,numImages,6):
+for i in range(5,numImages,numSkippedFrames):
     iImage = tiffStack[i,:,:]
     gx = skf.greycomatrix(iImage, d, [0], 712, 
                         symmetric=True, normed=True)
@@ -58,7 +68,7 @@ for i in range(5,numImages,6):
     cy = skf.greycoprops(gy, 'dissimilarity')
     cy = np.ndarray.flatten(cy)
     cy = np.ndarray.tolist(cy)    
-    timeMinutes = timeMinutes + 30
+    timeMinutes = timeMinutes + 5*numSkippedFrames
     outFileX.write('%8.2f\t' % timeMinutes)
     for n in cx:
         outFileX.write('%8.3f\t' % n)
