@@ -2,11 +2,17 @@
 """
 Title: Contrast Calculation for Filtered Stack
 Author: A. Ewen
-Version: 7.13.2020.1
+Version: 7.14.2020.1
 Usage: python contrastCalcFilteredStack.py
-Summary:
+Summary: This program reads in a tiff stack of microscope images and then
+         calculates the GLCM contrast for 100 reference-point 
+         distances for both the x and y directions. It is assumed that
+         the microscope images have been filtered by subtracting out the
+         intensity of the first image. The measurements are written to text 
+         files, one for the x measurements and one for the y measurements.
 History:
     7.13.2020.1: base
+    7.14.2020.1: organized the user supplied data in one place
     
 """
 
@@ -31,15 +37,17 @@ outFileX = open(outFileXName,'w')
 outFileY = open(outFileYName,'w')
 
 # Write header to x data file
-xHeader = ['    D%d' % (i+1) for i in range(102)]
-xHeader.insert(0,'Time')
-xHeader = "\t".join(xHeader) + '\n'
+xHeader1 = 'GLCM Contrast x\n'
+xHeader2 = ['    D%d' % (i+1) for i in range(102)]
+xHeader2.insert(0,'Time')
+xHeader = xHeader1 + "\t".join(xHeader2) + '\n'
 outFileX.write(xHeader)
 
 # Write header to y data file
-yHeader = ['    D%d' % (i+1) for i in range(102)]
-yHeader.insert(0,'Time')
-yHeader = "\t".join(yHeader) + '\n'
+yHeader1 = 'GLCM Contrast y\n'
+yHeader2 = ['    D%d' % (i+1) for i in range(102)]
+yHeader2.insert(0,'Time')
+yHeader = yHeader1 + "\t".join(yHeader2) + '\n'
 outFileY.write(yHeader)
 
 numImages = tiffStack.shape[0]
